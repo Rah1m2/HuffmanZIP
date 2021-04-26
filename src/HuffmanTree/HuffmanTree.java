@@ -1,8 +1,11 @@
 package HuffmanTree;
 
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.util.Scanner;
 
 import static HuffmanTree.CONSTANT.INFINITY;
+import static HuffmanTree.CONSTANT.SOURCE_PATH;
 
 class Node<ElemType>{
     ElemType data;
@@ -22,14 +25,19 @@ public class HuffmanTree {
 
     public static void main(String args[]){
         HuffmanTreeOp huffOp = new HuffmanTreeOp<Node>();
+        try {
+            System.out.println(huffOp.readInFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         /*创建赫夫曼树*/
         huffOp.CreateHuffmanTree();
+
 
         Node head = huffOp.nodes[huffOp.nodes.length-1];
         System.out.println(head.LChild.weight);
         System.out.println(head.RChild.weight);
     }
-
 
 }
 
@@ -89,9 +97,28 @@ class HuffmanTreeOp<ElemType>{
         return nodes;
     }
 
+    String readInFile() throws IOException {
+        StringBuilder results = new StringBuilder();
+        String tempStrs;
+        File file = new File(SOURCE_PATH);
+        FileReader fileReader = null;
+        BufferedReader bufferedreader = null;
+        StringBuffer buffer = new StringBuffer();
+            fileReader = new FileReader(file);
+        if(fileReader!=null)
+            bufferedreader = new BufferedReader(fileReader);
+        while((tempStrs = bufferedreader.readLine())!=null){
+            results.append(tempStrs).append("\n");
+        }
+//        System.out.println(results);
+
+        return String.valueOf(results);
+    }
+
 
 }
 
 interface CONSTANT{
     final int INFINITY = 65535;
+    final String SOURCE_PATH = "PATH/TEST.huffman";
 }
