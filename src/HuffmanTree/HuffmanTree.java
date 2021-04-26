@@ -20,10 +20,14 @@ class Node<ElemType>{
 
 public class HuffmanTree {
 
-
     public static void main(String args[]){
         HuffmanTreeOp huffOp = new HuffmanTreeOp<Node>();
+        /*创建赫夫曼树*/
         huffOp.CreateHuffmanTree();
+
+        Node head = huffOp.nodes[huffOp.nodes.length-1];
+        System.out.println(head.LChild.weight);
+        System.out.println(head.RChild.weight);
     }
 
 
@@ -32,17 +36,19 @@ public class HuffmanTree {
 
 
 class HuffmanTreeOp<ElemType>{
+    Node[] nodes;
 
-
-    Node CreateHuffmanTree() {
-        int num;
+    Node[] CreateHuffmanTree(){
         int weight;
         int min1,min2;
         int index1,index2;
+        int num;
         Scanner scanner = new Scanner(System.in);
         System.out.println("please input the number of leaves:");
         num = scanner.nextInt();
-        Node[] nodes = new Node[2*num-1]; //自动识别为Object类型
+        nodes = new Node[2*num-1];
+
+//        Node[] nodes = new Node[2*num-1]; //自动识别为Object类型
         for(int i=0;i<2*num-1;i++)
             nodes[i] = new Node<String>();
 
@@ -61,22 +67,28 @@ class HuffmanTreeOp<ElemType>{
             min1=min2=INFINITY;
             index1=index2=0;
             for(int j=0;j<num+i;j++){
-                if(nodes[j].weight<min1 && nodes[i].Parent==null){
+                if(nodes[j].weight<min1 && nodes[j].Parent==null){
                     min2 = min1;
                     index2 = index1;
-                    min1 = nodes[i].weight;
+                    min1 = nodes[j].weight;
                     index1 = j;
                 }
-                if(nodes[j].weight<min2 && nodes[i].Parent==null){
-                    min2 = nodes[i].weight;
+                else if(nodes[j].weight<min2 && nodes[j].Parent==null){
+                    min2 = nodes[j].weight;
                     index2 = j;
                 }
-                nodes[num+i].weight = nodes[index1].weight+nodes[index2].weight;
                 //still working
             }
+            nodes[num+i].weight = nodes[index1].weight+nodes[index2].weight;
+            nodes[num+i].LChild = nodes[index1];
+            nodes[num+i].RChild = nodes[index2];
+            nodes[index1].Parent = nodes[num+i];
+            nodes[index2].Parent = nodes[num+i];
+            System.out.println("x1.weight and x2.weight in round "+i+":"+nodes[index1].weight+","+nodes[index2].weight);
         }
-        return null;
+        return nodes;
     }
+
 
 }
 
