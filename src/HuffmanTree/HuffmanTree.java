@@ -25,13 +25,16 @@ public class HuffmanTree {
 
     public static void main(String args[]){
         HuffmanTreeOp huffOp = new HuffmanTreeOp<Node>();
+        String ReadInStrs = null;
         try {
-            System.out.println(huffOp.readInFile());
+            ReadInStrs = huffOp.readInFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        int[] frequence = huffOp.CountLetterFrequence(ReadInStrs);
+        String values = "ABCDE";
         /*创建赫夫曼树*/
-        huffOp.CreateHuffmanTree();
+        huffOp.CreateHuffCode(huffOp.CreateHuffmanTree(values,frequence));
 
 
         Node head = huffOp.nodes[huffOp.nodes.length-1];
@@ -46,7 +49,7 @@ public class HuffmanTree {
 class HuffmanTreeOp<ElemType>{
     Node[] nodes;
 
-    Node[] CreateHuffmanTree(){
+    int CreateHuffmanTree(String values,int[] frequence){
         int weight;
         int min1,min2;
         int index1,index2;
@@ -55,16 +58,18 @@ class HuffmanTreeOp<ElemType>{
         System.out.println("please input the number of leaves:");
         num = scanner.nextInt();
         nodes = new Node[2*num-1];
-
-//        Node[] nodes = new Node[2*num-1]; //自动识别为Object类型
+                                    //自动识别为Object类型
         for(int i=0;i<2*num-1;i++)
             nodes[i] = new Node<String>();
 
         System.out.println("Please input the weight of the nodes(end with Enter):");
         for(int i=0;i<num;i++){
-            System.out.println("\nNode "+i+":");
-            weight = scanner.nextInt();
-            nodes[i].weight = weight;
+            System.out.println("\nNode "+values.charAt(i)+":");
+//            weight = scanner.nextInt();
+//            nodes[i].weight = weight;
+            nodes[i].weight = frequence[i];
+//            System.out.println("Please input the weight of the nodes(end with Enter):");
+            nodes[i].data = values.charAt(i);
         }
 
         for (Node node1:nodes) {
@@ -94,7 +99,61 @@ class HuffmanTreeOp<ElemType>{
             nodes[index2].Parent = nodes[num+i];
             System.out.println("x1.weight and x2.weight in round "+i+":"+nodes[index1].weight+","+nodes[index2].weight);
         }
-        return nodes;
+        return num;
+    }
+
+    String CreateHuffCode(int num){
+        char cd[] = new char[num];
+        int start;
+        Node node;
+        Node child;
+        for(int i=0;i<num;i++){
+            child = nodes[i];
+            node = nodes[i].Parent;
+            start = 0;
+            while(node!=null){
+                if(node.LChild == child)
+                    cd[start] = '0';
+                else
+                    cd[start] = '1';
+                child = node;
+                node = node.Parent;
+                start++;
+            }
+            for (int j=cd.length-1;j>=0;j--) {
+                System.out.print(cd[j]);
+            }
+            System.out.println();
+        }
+
+        return null;
+    }
+
+    int[] CountLetterFrequence(String ReadInStrs){
+        int[] LetterCounter = {0,0,0,0,0};
+        for (int i=0;i<ReadInStrs.length();i++) {
+            if(ReadInStrs.charAt(i) == 'A')
+                LetterCounter[0]++;
+            if(ReadInStrs.charAt(i) == 'B')
+                LetterCounter[1]++;
+            if(ReadInStrs.charAt(i) == 'C')
+                LetterCounter[2]++;
+            if(ReadInStrs.charAt(i) == 'D')
+                LetterCounter[3]++;
+            if(ReadInStrs.charAt(i) == 'E')
+                LetterCounter[4]++;
+        }
+        System.out.println("We have "+LetterCounter[0]+" A:");
+        System.out.println("We have "+LetterCounter[1]+" B:");
+        System.out.println("We have "+LetterCounter[2]+" C:");
+        System.out.println("We have "+LetterCounter[3]+" D:");
+        System.out.println("We have "+LetterCounter[4]+" E:");
+        return LetterCounter;
+    }
+
+    String DecodeHuff(){
+
+        return null;
     }
 
     String readInFile() throws IOException {
