@@ -42,6 +42,7 @@ public class HuffmanTree {
                 try{
                     ReadInBytes = huffOp.readInFile(TARGET_PATH,true);
                 }catch(IOException ignored){}
+                /*split the read in characters*/
                 Regulation = ReadInBytes.split("[A-Z:]+");
                 String[] reg  = new String[Regulation.length-1];
                 for(int i=0,j=1;j<Regulation.length;i++,j++){
@@ -55,7 +56,9 @@ public class HuffmanTree {
                     ReadInBytes = huffOp.readInFile(TARGET_PATH,false);
                 }catch(IOException ignored){}
                 System.out.println("Decoding test:");  //解压缩
-                huffOp.DecodeHuff(huffOp.DecToBin(ReadInBytes));
+                PutOutStrs = huffOp.DecodeHuff(huffOp.DecToBin(ReadInBytes));
+                huffOp.writeLetterToFile(PutOutStrs);
+
                 break;
 
             case "Code":
@@ -64,6 +67,7 @@ public class HuffmanTree {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                System.out.println("str long:"+ReadInStrs.length());
                 frequence = huffOp.CountLetterFrequence(ReadInStrs); //计算ABCDE每个字符出现的次数
                 huffOp.CreateHuffCode(huffOp.CreateHuffmanTree(values,frequence));//生成哈夫曼树
                 huffOp.ReplaceLetter(ReadInStrs); //生成编码
@@ -71,35 +75,6 @@ public class HuffmanTree {
                 huffOp.writeCodeToFile();  //将压缩好的编码写入到文件里
                 break;
         }
-
-//        try {
-//            ReadInStrs = huffOp.readInFile(SOURCE_PATH); //把文件中所有的内容读入内存
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        PutOutStrs = ReadInStrs.substring(0);
-
-//        int[] frequence = huffOp.CountLetterFrequence(ReadInStrs); //计算ABCDE每个字符出现的次数
-
-        /*创建赫夫曼树*/
-//        huffOp.CreateHuffCode(huffOp.CreateHuffmanTree(values,frequence));//生成哈夫曼树
-        /*end*/
-
-//        Node head = huffOp.nodes[huffOp.nodes.length-1];// set root node
-//        huffOp.ReplaceLetter(ReadInStrs); //生成编码
-//        huffOp.writeInfoToFile();   //将编码信息写入文件头部
-//        huffOp.writeCodeToFile();  //将压缩好的编码写入到文件里
-
-        /*从文件中读取压缩编码*/
-//        try{
-//            ReadInBytes = huffOp.readInFile(TARGET_PATH,true);
-//        }catch(IOException e){}
-        /*end*/
-//        System.out.println("Input test:");
-//        System.out.println(ReadInBytes);
-
-//        System.out.println("Decoding test:");  //解压缩
-//        huffOp.DecodeHuff(huffOp.DecToBin(ReadInBytes));
 
     }
 
@@ -306,6 +281,7 @@ class HuffmanTreeOp<ElemType>{
 
     String DecodeHuff(String DecodeStr){
 //        DecodeStr = ResultStr;
+        String result = "";
         Node root = head;
         Node temp;
         while(root.Parent != null) //find root
@@ -318,11 +294,12 @@ class HuffmanTreeOp<ElemType>{
                 temp = temp.RChild;
             if(temp.data != null) {
                 System.out.print(temp.data);
+                result += temp.data;
                 temp = root;
             }
         }
         System.out.println();
-        return null;
+        return result;
     }
 
     void writeInfoToFile() {
@@ -359,6 +336,15 @@ class HuffmanTreeOp<ElemType>{
                 e.printStackTrace();
             }
             /*end of output*/
+        }
+    }
+
+    void writeLetterToFile(String PutOutStrs){
+//        PutOutStrs = PutOutStrs.substring(0,100);
+        try {
+            writeOutFile(DECODE_PATH,PutOutStrs,false,"StringType");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
