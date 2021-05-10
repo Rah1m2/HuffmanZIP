@@ -73,7 +73,6 @@ public class HuffmanTree {
                 huffOp.writeCodeToFile();  //将压缩好的编码写入到文件里
                 break;
         }
-
     }
 
 }
@@ -88,7 +87,7 @@ class HuffmanTreeOp<ElemType>{
     String ResultStr;
     String TobeWriteStr; //将要写入文件的编码
     String[] CodeCmp; //存储字符对应的赫夫曼编码值
-    HashMap<Byte, Integer> SaveMap;
+    HashMap<Byte, String> SaveMap;
     HashMap<Byte, Character> CodeMap;
 
     HuffmanTreeOp(){
@@ -195,8 +194,8 @@ class HuffmanTreeOp<ElemType>{
         int start;
         Node node;
         Node child;
-        byte[] BCodes;
-        int IntValues;
+        byte BtCodes;
+        String StrValues;
         for(int i=0;i<num;i++){
             child = nodes[i];
             node = nodes[i].Parent;
@@ -220,13 +219,10 @@ class HuffmanTreeOp<ElemType>{
             CodeCmp[i] = "";
             for(int j=start-1;j>=0;j--)
                 CodeCmp[i] += cd[j];
-//            byte BCode = (byte)(char)nodes[i].data;
-            IntValues = Integer.parseInt(CodeCmp[i]);
-//            BCodes = ((String)nodes[i].data).getBytes();
-                SaveMap.put((byte)(char)nodes[i].data,IntValues);
-
-//            while(CodeCmp[i].length()<3)
-//                CodeCmp[i] = "0"+CodeCmp[i];
+            //save into HashMap
+            StrValues = CodeCmp[i];
+            BtCodes = (byte)(char)nodes[i].data;
+            SaveMap.put(BtCodes,StrValues);
             /*end of saving*/
         }
         System.out.println("The total:"+ResultStr);
@@ -237,46 +233,33 @@ class HuffmanTreeOp<ElemType>{
     /*Replace letters with Huffman Code*/
     String ReplaceLetter(String letters){
         ResultStr = "";
-
         for(int i=0;i<letters.length();i++){
-            if(letters.charAt(i) == 'A'){
-                ResultStr += CodeCmp[0];
-                continue;
-            }
-            if(letters.charAt(i) == 'B'){
-                ResultStr += CodeCmp[1];
-                continue;
-            }
-            if(letters.charAt(i) == 'C'){
-                ResultStr += CodeCmp[2];
-                continue;
-            }
-            if(letters.charAt(i) == 'D'){
-                ResultStr += CodeCmp[3];
-                continue;
-            }
-            if(letters.charAt(i) == 'E'){
-                ResultStr += CodeCmp[4];
-                continue;
-            }
+            byte BtCode = (byte)letters.charAt(i);
+            ResultStr += SaveMap.get(BtCode);
         }
         return null;
     }
 
     int[] CountLetterfrequency(String ReadInStrs){
+        int counts;
         int[] LetterCounter = {0,0,0,0,0};
         byte[] conByte = ReadInStrs.getBytes();
-        SaveMap = new HashMap<Byte, Integer>();
+        SaveMap = new HashMap<Byte, String>();
         for(int i=0;i<ReadInStrs.length();i++){
-            Integer Count = SaveMap.get(conByte[i]);
-            if(Count == null)
-                SaveMap.put(conByte[i],1);
-            else
-                SaveMap.put(conByte[i],++Count);
+            String isRecord = SaveMap.get(conByte[i]);
+//            counts = Integer.parseInt(isRecord);
+            if(isRecord == null)
+                SaveMap.put(conByte[i],"1");
+            else {
+                counts = Integer.parseInt(isRecord);
+                counts++;
+                isRecord = String.valueOf(counts);
+                SaveMap.put(conByte[i], isRecord);
+            }
         }
         Byte BKey = 65;
         for(int i=0;i<LetterCounter.length;i++)
-            LetterCounter[i] = SaveMap.get(BKey++);
+            LetterCounter[i] = Integer.parseInt(SaveMap.get(BKey++));
         System.out.println("We have "+LetterCounter[0]+" A:");
         System.out.println("We have "+LetterCounter[1]+" B:");
         System.out.println("We have "+LetterCounter[2]+" C:");
