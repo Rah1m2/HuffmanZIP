@@ -27,7 +27,7 @@ public class HuffmanTree {
         String ReadInStrs = null;
         String PutOutStrs = null;
         String ReadInBytes = null;
-        String values = "ABCDE";
+        String values = "ABCDEF";
         int[] frequency;
         String Selection;
         String[] Regulation;
@@ -91,12 +91,11 @@ class HuffmanTreeOp<ElemType>{
     HashMap<Byte, Character> CodeMap;
 
     HuffmanTreeOp(){
-        CodeCmp = new String[5];
+        CodeCmp = new String[6];
     }
 
     /*Init Huffman Tree*/
     int CreateHuffmanTree(String values,int[] frequency){
-        int weight;
         int min1,min2;
         int index1,index2;
         int num;
@@ -119,6 +118,7 @@ class HuffmanTreeOp<ElemType>{
             System.out.println("\nNode "+values.charAt(i)+":");
             nodes[i].weight = frequency[i];
             nodes[i].data = values.charAt(i);
+//            nodes[i].data = (char)i;
         }
         /*end*/
 
@@ -242,7 +242,7 @@ class HuffmanTreeOp<ElemType>{
 
     int[] CountLetterfrequency(String ReadInStrs){
         int counts;
-        int[] LetterCounter = {0,0,0,0,0};
+        int[] LetterCounter = {0,0,0,0,0,0};
         byte[] conByte = ReadInStrs.getBytes();
         SaveMap = new HashMap<Byte, String>();
         for(int i=0;i<ReadInStrs.length();i++){
@@ -265,6 +265,7 @@ class HuffmanTreeOp<ElemType>{
         System.out.println("We have "+LetterCounter[2]+" C:");
         System.out.println("We have "+LetterCounter[3]+" D:");
         System.out.println("We have "+LetterCounter[4]+" E:");
+        System.out.println("We have "+LetterCounter[5]+" F:");
         return LetterCounter;
     }
 
@@ -293,7 +294,7 @@ class HuffmanTreeOp<ElemType>{
     }
 
     void writeInfoToFile() {
-        String values = "ABCDE";
+        String values = "ABCDEF";
         String str = "";
         for (int i=0;i<CodeCmp.length;i++)
             str += values.charAt(i)+":"+CodeCmp[i]+"\r\n";
