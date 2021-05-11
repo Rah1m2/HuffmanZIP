@@ -24,10 +24,11 @@ public class HuffmanTree {
 
     public static void main(String args[]){
         HuffmanTreeOp huffOp = new HuffmanTreeOp<Node>();
+        IOUtil ioUtil = new IOUtil(huffOp.getHashMap());
         String ReadInStrs = null;
         String PutOutStrs = null;
         String ReadInBytes = null;
-        String values = "ABCDEF";
+        String values = "ABCDEFG";
         int[] frequency;
         String Selection;
         String[] Regulation;
@@ -39,10 +40,10 @@ public class HuffmanTree {
         switch(Selection){
             case "Decode":
                 try{
-                    ReadInBytes = huffOp.readInFile(TARGET_PATH,true);
+                    ReadInBytes = ioUtil.readInFile(TARGET_PATH,true);
                 }catch(IOException ignored){}
                 /*split the read in characters*/
-                Regulation = ReadInBytes.split("[A-Z:]+");
+                Regulation = ReadInBytes.split("[A-Za-z:]+");
                 String[] reg  = new String[Regulation.length-1];
                 for(int i=0,j=1;j<Regulation.length;i++,j++){
                     reg[i] = Regulation[j];
@@ -52,25 +53,26 @@ public class HuffmanTree {
                  * Use ReadInBytes to init HuffmanTree.
                  */
                 try{
-                    ReadInBytes = huffOp.readInFile(TARGET_PATH,false);
+                    ReadInBytes = ioUtil.readInFile(TARGET_PATH,false);
                 }catch(IOException ignored){}
                 System.out.println("Decoding test:");  //解压缩
                 PutOutStrs = huffOp.DecodeHuff(huffOp.DecToBin(ReadInBytes));
-                huffOp.writeLetterToFile(PutOutStrs);
+                ioUtil.writeLetterToFile(PutOutStrs);
                 break;
 
             case "Code":
                 try {
-                    ReadInStrs = huffOp.readInFile(SOURCE_PATH); //把文件中所有的内容读入内存
+                    ReadInStrs = ioUtil.readInFile(SOURCE_PATH); //把文件中所有的内容读入内存
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 System.out.println("str long:"+ReadInStrs.length());
                 frequency = huffOp.CountLetterfrequency(ReadInStrs); //计算ABCDE每个字符出现的次数
-                huffOp.CreateHuffCode(huffOp.CreateHuffmanTree(values,frequency));//生成哈夫曼树
+                huffOp.CreateHuffCode(huffOp.CreateHuffmanTree(frequency));//生成哈夫曼树
                 huffOp.ReplaceLetter(ReadInStrs); //生成编码
-                huffOp.writeInfoToFile();   //将编码信息写入文件头部
-                huffOp.writeCodeToFile();  //将压缩好的编码写入到文件里
+                ioUtil.writeInfoToFile();   //将编码信息写入文件头部
+                ioUtil.setCodedResultStr(huffOp.getCodedResultStr());
+                ioUtil.writeCodeToFile();  //将压缩好的编码写入到文件里
                 break;
         }
     }
@@ -82,20 +84,21 @@ public class HuffmanTree {
 class HuffmanTreeOp<ElemType>{
     Node head;
     Node[] nodes;  //哈夫曼树的结点数组
-    int ByteCodes;  //二进制转化成的哈夫曼编码
-    String ReadInStr; //从文件中读入的数据
     String ResultStr;
-    String TobeWriteStr; //将要写入文件的编码
-    String[] CodeCmp; //存储字符对应的赫夫曼编码值
-    HashMap<Byte, String> SaveMap;
-    HashMap<Byte, Character> CodeMap;
+    HashMap<Byte, String> SaveMap; //存储字符对应的赫夫曼编码值
 
     HuffmanTreeOp(){
-        CodeCmp = new String[6];
+        SaveMap = new HashMap<Byte, String>();
+    }
+    HashMap<Byte,String> getHashMap(){
+        return SaveMap;
+    }
+    String getCodedResultStr(){
+        return ResultStr;
     }
 
     /*Init Huffman Tree*/
-    int CreateHuffmanTree(String values,int[] frequency){
+    int CreateHuffmanTree(int[] frequency){
         int min1,min2;
         int index1,index2;
         int num;
@@ -114,11 +117,11 @@ class HuffmanTreeOp<ElemType>{
 
         /*给结点赋权值与数值*/
         System.out.println("Please input the weight of the nodes(end with Enter):");
-        for(int i=0;i<num;i++){
-            System.out.println("\nNode "+values.charAt(i)+":");
-            nodes[i].weight = frequency[i];
-            nodes[i].data = values.charAt(i);
-//            nodes[i].data = (char)i;
+        int k=0;
+        for (Byte BtVal:SaveMap.keySet()) {
+            nodes[k].weight = frequency[k];
+            nodes[k].data = (char)(int)BtVal;
+            k++;
         }
         /*end*/
 
@@ -127,6 +130,7 @@ class HuffmanTreeOp<ElemType>{
             System.out.println(node1.weight);
         }
         /*end*/
+
         /*生成HuffmanTree*/
         for(int i=0;i<num-1;i++){
             min1=min2=INFINITY;
@@ -191,6 +195,7 @@ class HuffmanTreeOp<ElemType>{
     String CreateHuffCode(int num){
         char[] cd;
         ResultStr = "";
+        String TempCodeSaver;
         int start;
         Node node;
         Node child;
@@ -216,11 +221,11 @@ class HuffmanTreeOp<ElemType>{
             for(int j=start-1;j>=0;j--) //Combine the codes
                 ResultStr += cd[j];
             /*save each letter's codes*/
-            CodeCmp[i] = "";
+            TempCodeSaver = "";
             for(int j=start-1;j>=0;j--)
-                CodeCmp[i] += cd[j];
+                TempCodeSaver += cd[j];
             //save into HashMap
-            StrValues = CodeCmp[i];
+            StrValues = TempCodeSaver;
             BtCodes = (byte)(char)nodes[i].data;
             SaveMap.put(BtCodes,StrValues);
             /*end of saving*/
@@ -237,17 +242,16 @@ class HuffmanTreeOp<ElemType>{
             byte BtCode = (byte)letters.charAt(i);
             ResultStr += SaveMap.get(BtCode);
         }
-        return null;
+        return ResultStr;
     }
 
     int[] CountLetterfrequency(String ReadInStrs){
         int counts;
         int[] LetterCounter = {0,0,0,0,0,0};
+//        int[] LetterCounter = new int[256];
         byte[] conByte = ReadInStrs.getBytes();
-        SaveMap = new HashMap<Byte, String>();
         for(int i=0;i<ReadInStrs.length();i++){
             String isRecord = SaveMap.get(conByte[i]);
-//            counts = Integer.parseInt(isRecord);
             if(isRecord == null)
                 SaveMap.put(conByte[i],"1");
             else {
@@ -257,9 +261,18 @@ class HuffmanTreeOp<ElemType>{
                 SaveMap.put(conByte[i], isRecord);
             }
         }
-        Byte BKey = 65;
-        for(int i=0;i<LetterCounter.length;i++)
-            LetterCounter[i] = Integer.parseInt(SaveMap.get(BKey++));
+        LetterCounter = new int[SaveMap.size()];
+//        Byte BKey = 65;
+//        for(int i=0;i<LetterCounter.length;i++)
+//            LetterCounter[i] = Integer.parseInt(SaveMap.get(BKey++));
+        int i=0;
+        for(Object key:SaveMap.keySet())
+        {
+            LetterCounter[i] = Integer.parseInt(SaveMap.get(key));
+            System.out.println("Key: "+ key +" Value: "+SaveMap.get(key));
+            i++;
+        }
+        System.out.println("test:"+SaveMap.size());
         System.out.println("We have "+LetterCounter[0]+" A:");
         System.out.println("We have "+LetterCounter[1]+" B:");
         System.out.println("We have "+LetterCounter[2]+" C:");
@@ -293,52 +306,6 @@ class HuffmanTreeOp<ElemType>{
         return result;
     }
 
-    void writeInfoToFile() {
-        String values = "ABCDEF";
-        String str = "";
-        for (int i=0;i<CodeCmp.length;i++)
-            str += values.charAt(i)+":"+CodeCmp[i]+"\r\n";
-        //write code segments to file
-        try {
-            writeOutFile(TARGET_PATH,str,false,"StringType");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //end
-    }
-
-
-    /*将已经编码好的内容写入文件*/
-    void writeCodeToFile(){
-        for(int i=0;i<ResultStr.length();){
-            TobeWriteStr = "";
-            for(int j=0;j<8;j++,i++){
-                if (i >= ResultStr.length())
-                    TobeWriteStr = TobeWriteStr+'0';
-                else
-                    TobeWriteStr += ResultStr.charAt(i);
-            }
-            //When routine is over,write bytes to file
-            ByteCodes = BinToDec(TobeWriteStr);
-            /*output sentence*/
-            try {
-                writeOutFile(TARGET_PATH,ByteCodes,true,"IntType");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            /*end of output*/
-        }
-    }
-
-    void writeLetterToFile(String PutOutStrs){
-//        PutOutStrs = PutOutStrs.substring(0,100);
-        try {
-            writeOutFile(DECODE_PATH,PutOutStrs,false,"StringType");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     int BinToDec(String str){
         return ((int)str.charAt(0)-48)*128+
                 ((int)str.charAt(1)-48)*64+
@@ -361,79 +328,6 @@ class HuffmanTreeOp<ElemType>{
         }
         return DecodeStr;
     }
-
-    String readInFile(String Address,boolean ReadCode) throws IOException {
-        /*declaration area*/
-        StringBuilder results;
-        String tempStrs;
-        File file;
-        FileReader fileReader;
-        BufferedReader bufferedreader;
-        /*end of declaration*/
-
-        results = new StringBuilder();
-        file = new File(Address);
-        fileReader = new FileReader(file);
-        bufferedreader = new BufferedReader(fileReader);
-        if(fileReader==null)
-            return "EMPTY";
-
-        /*read the head info or the codes*/
-        if(ReadCode)
-            for (int i=0;i<CodeCmp.length && (tempStrs=bufferedreader.readLine())!=null;i++)
-                results.append(tempStrs);
-        else
-            for(String val:CodeCmp)
-                bufferedreader.readLine();
-        while((tempStrs = bufferedreader.readLine())!=null)
-            results.append(tempStrs);
-        /*end*/
-
-        ReadInStr = String.valueOf(results);
-        bufferedreader.close();
-        return String.valueOf(results);
-    }
-
-    String readInFile(String Address) throws IOException { //reload
-        StringBuilder results;
-        String tempStrs;
-        File file;
-        FileReader fileReader;
-        BufferedReader bufferedreader;
-
-        results = new StringBuilder();
-        file = new File(Address);
-        fileReader = new FileReader(file);
-        if(fileReader == null)
-            return "EMPTY";
-        bufferedreader = new BufferedReader(fileReader);
-        while((tempStrs = bufferedreader.readLine())!=null){
-            results.append(tempStrs);
-        }
-
-        ReadInStr = String.valueOf(results);
-        bufferedreader.close();
-        return String.valueOf(results);
-    }
-
-    String writeOutFile(String Address,Object Codes,boolean flag,String SaveMode) throws IOException{
-        BufferedWriter bufferedwriter;
-        FileWriter fileWriter;
-        File file = new File(Address);
-        fileWriter = new FileWriter(file,flag);
-        bufferedwriter = new BufferedWriter(fileWriter);
-        // write to file
-        try {
-            if(SaveMode.equals("IntType"))
-                bufferedwriter.write((int)Codes);
-            else if(SaveMode.equals("StringType"))
-                bufferedwriter.write((String)Codes);
-        }catch (IOException e){}
-        /*		System.out.println("DEBUG:"+ByteCodes);   //print debug informations*/
-        bufferedwriter.close();
-        return "YES";
-    }
-
 
 }
 
