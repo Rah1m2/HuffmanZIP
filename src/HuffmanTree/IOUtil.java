@@ -11,6 +11,7 @@ public class IOUtil {
     String ResultStr;
     String TobeWriteStr; //将要写入文件的编码
     int ByteCodes;
+    int ReadInCount;
     HashMap<Byte,String> SaveMap;
 
     IOUtil(){
@@ -24,6 +25,10 @@ public class IOUtil {
 
     void setHashMap(HashMap<Byte,String> SaveMap){
         this.SaveMap = SaveMap;
+    }
+
+    int getReadInInfo(){
+        return ReadInCount;
     }
 
     String readInFile(String Address, boolean isReadInfo) throws IOException {
@@ -45,12 +50,16 @@ public class IOUtil {
 
         /*read the head info or the codes*/
         ChNum = Integer.parseInt(bufferedreader.readLine());
+        this.ReadInCount = ChNum;
         if (isReadInfo) { //decode true
-            for (int i = 0; i < ChNum && (tempStrs = bufferedreader.readLine()) != null; i++)
-                results.append(tempStrs);
+//            for (int i = 0; i < ChNum && (tempStrs = bufferedreader.readLine()) != null; i++)
+//                results.append(tempStrs);
+            tempStrs = bufferedreader.readLine();
+            results.append(tempStrs);
         } else {
-            for (int i = 0; i < ChNum; i++)
-                bufferedreader.readLine();
+//            for (int i = 0; i < ChNum; i++)
+//                bufferedreader.readLine();
+            bufferedreader.readLine();
         }
         while ((tempStrs = bufferedreader.readLine()) != null)
             results.append(tempStrs);
@@ -86,10 +95,10 @@ public class IOUtil {
     void writeInfoToFile() {
         String str = "";
         for (Byte BtKey : SaveMap.keySet()) {
-            str += (char) (int) BtKey + ":" + SaveMap.get(BtKey) + "\r\n";
+            str += (char) (int) BtKey + ":" + SaveMap.get(BtKey) + " ";
         }
 
-        str = String.valueOf(SaveMap.size()) + "\r\n" + str;
+        str = String.valueOf(SaveMap.size()) + "\r\n" + str + "\r\n";
 
         //write code segments to file
         try {

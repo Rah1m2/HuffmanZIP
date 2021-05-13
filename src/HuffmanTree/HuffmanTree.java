@@ -28,11 +28,15 @@ public class HuffmanTree {
         String ReadInStrs = null;
         String PutOutStrs = null;
         String ReadInBytes = null;
-        String values = "ABCDEFG";
+        String values = "";
+        String TempRegex = "";
         int[] frequency;
+        int Border;
         String Selection;
         String[] Regulation;
         Scanner scanner;
+        Scanner ScanRegex;
+        String Delimiter;
 
         System.out.println("You want to decode or what? (Decode,Code)");
         scanner = new Scanner(System.in);
@@ -43,12 +47,26 @@ public class HuffmanTree {
                     ReadInBytes = ioUtil.readInFile(TARGET_PATH,true);
                 }catch(IOException ignored){}
                 /*split the read in characters*/
-                Regulation = ReadInBytes.split("[A-Za-z:]+");
-                String[] reg  = new String[Regulation.length-1];
-                for(int i=0,j=1;j<Regulation.length;i++,j++){
-                    reg[i] = Regulation[j];
-                }
-                huffOp.CreateHuffCode(huffOp.CreateDeHuffmanTree(values,reg));
+                Border = ioUtil.getReadInInfo();
+
+                /*正则表达式处理模块*/
+                TempRegex = "";
+                String[] reg  = new String[Border];
+                assert ReadInBytes != null;
+                ScanRegex = new Scanner(ReadInBytes);
+                for(int i=0;ScanRegex.hasNext() && i<Border;i++)
+                    TempRegex +=  ScanRegex.next();
+                ScanRegex = new Scanner(TempRegex);
+                ScanRegex.useDelimiter("[:0-9 ]+");
+                for(int i=0;ScanRegex.hasNext() && i<Border;i++)
+                    values += ScanRegex.next();
+                ScanRegex = new Scanner(TempRegex);
+                ScanRegex.useDelimiter("[A-Za-z:]+");
+                for(int i=0;ScanRegex.hasNext() && i<Border;i++)
+                    reg[i] = ScanRegex.next();
+                /*end*/
+
+                huffOp.CreateDeHuffmanTree(values,reg);
                 /*
                  * Use ReadInBytes to init HuffmanTree.
                  */
@@ -75,6 +93,10 @@ public class HuffmanTree {
                 ioUtil.writeCodeToFile();  //将压缩好的编码写入到文件里
                 break;
         }
+    }
+
+    void RegexExtract(){
+
     }
 
 }
@@ -188,7 +210,7 @@ class HuffmanTreeOp<ElemType>{
             node = head;
         }
 
-        return 0;
+        return 7;
     }
 
     /*init Huffman Code*/
